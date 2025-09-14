@@ -55,15 +55,22 @@ class AlarmService: ObservableObject {
     // MARK: - Alarm Playback
     
     func startAlarm(_ alarm: Alarm) {
-        currentAlarm = alarm
-        isPlaying = true
-        
-        // 音声再生
-        SoundService.shared.playAlarmSound(alarm.soundName, volume: alarm.volume)
-        
-        // バイブレーション
-        if AppSettings().alarmSettings.hapticFeedback {
-            SoundService.shared.playHapticFeedback()
+        DispatchQueue.main.async {
+            self.currentAlarm = alarm
+            self.isPlaying = true
+            
+            // 音声再生
+            SoundService.shared.playAlarmSound(alarm.soundName, volume: alarm.volume)
+            
+            // バイブレーション
+            if AppSettings().alarmSettings.hapticFeedback {
+                SoundService.shared.playHapticFeedback()
+            }
+            
+            // アラーム開始の通知を送信
+            NotificationCenter.default.post(name: .alarmTriggered, object: alarm)
+            
+            print("アラーム開始: \(alarm.title) at \(alarm.timeString)")
         }
     }
     
@@ -74,9 +81,11 @@ class AlarmService: ObservableObject {
     }
     
     func stopCurrentAlarm() {
-        isPlaying = false
-        currentAlarm = nil
-        SoundService.shared.stopAlarmSound()
+        DispatchQueue.main.async {
+            self.isPlaying = false
+            self.currentAlarm = nil
+            SoundService.shared.stopAlarmSound()
+        }
     }
     
     func snoozeAlarm(_ alarm: Alarm) {
@@ -146,6 +155,19 @@ class AlarmService: ObservableObject {
             // リピート設定がある場合は今日の曜日が含まれているかチェック
             return alarm.repeatDays.contains(todayWeekday)
         }
+    }
+    
+    // MARK: - Test Methods
+    
+    func testAlarm() {
+        let testAlarm = Alarm(
+            title: "テストアラーム",
+            time: Date(),
+            isEnabled: true,
+            soundName: "default",
+            volume: 0.8
+        )
+        startAlarm(testAlarm)
     }
 }
 

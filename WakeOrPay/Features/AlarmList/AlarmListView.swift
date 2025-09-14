@@ -19,14 +19,21 @@ struct AlarmListView: View {
                 AppConstants.Colors.background
                     .ignoresSafeArea()
                 
-                if viewModel.isLoading {
-                    ProgressView("読み込み中...")
-                        .font(AppConstants.Fonts.body)
-                } else if viewModel.alarms.isEmpty {
-                    emptyStateView
-                } else {
+            if viewModel.isLoading {
+                ProgressView("読み込み中...")
+                    .font(AppConstants.Fonts.body)
+            } else if viewModel.alarms.isEmpty {
+                emptyStateView
+            } else {
+                VStack {
+                    // アラーム再生中の停止ボタン
+                    if AlarmService.shared.isPlaying {
+                        alarmStopView
+                    }
+                    
                     alarmListView
                 }
+            }
             }
             .navigationTitle("WakeOrPay")
             .navigationBarTitleDisplayMode(.large)
@@ -39,9 +46,23 @@ struct AlarmListView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: viewModel.showAddAlarm) {
-                        Image(systemName: "plus")
-                            .foregroundColor(AppConstants.Colors.primary)
+                    HStack {
+                        Button("音テスト") {
+                            SoundService.shared.playSimpleTestSound()
+                        }
+                        .font(.caption)
+                        .foregroundColor(AppConstants.Colors.secondary)
+                        
+                        Button("アラームテスト") {
+                            SoundService.shared.playTestAlarm()
+                        }
+                        .font(.caption)
+                        .foregroundColor(AppConstants.Colors.warning)
+                        
+                        Button(action: viewModel.showAddAlarm) {
+                            Image(systemName: "plus")
+                                .foregroundColor(AppConstants.Colors.primary)
+                        }
                     }
                 }
             }
@@ -65,6 +86,13 @@ struct AlarmListView: View {
             Task {
                 await viewModel.requestNotificationPermission()
             }
+            
+            // デバッグ情報を表示
+            print("=== WakeOrPay デバッグ情報 ===")
+            print("アラーム数: \(viewModel.alarms.count)")
+            print("有効なアラーム数: \(viewModel.enabledAlarms.count)")
+            print("次のアラーム: \(viewModel.nextAlarm?.title ?? "なし")")
+            print("===============================")
         }
     }
     
@@ -180,6 +208,31 @@ struct AlarmListView: View {
         .padding(.top, AppConstants.Spacing.sm)
     }
     
+    // MARK: - Alarm Stop View
+    
+    private var alarmStopView: some View {
+        VStack(spacing: AppConstants.Spacing.md) {
+            Text("アラームが鳴っています")
+                .font(AppConstants.Fonts.headline)
+                .foregroundColor(AppConstants.Colors.error)
+            
+            if let currentAlarm = AlarmService.shared.currentAlarm {
+                Text(currentAlarm.title)
+                    .font(AppConstants.Fonts.title2)
+                    .foregroundColor(AppConstants.Colors.text)
+            }
+            
+            Button("アラームを停止") {
+                AlarmService.shared.stopCurrentAlarm()
+            }
+            .buttonStyle(StopButtonStyle())
+        }
+        .padding(AppConstants.Spacing.lg)
+        .background(AppConstants.Colors.error.opacity(0.1))
+        .cornerRadius(AppConstants.UI.cornerRadius)
+        .padding(.horizontal, AppConstants.Spacing.md)
+    }
+    
     // MARK: - Sort Picker
     
     private var sortPicker: some View {
@@ -246,6 +299,20 @@ struct PrimaryButtonStyle: ButtonStyle {
             .padding(.horizontal, AppConstants.Spacing.lg)
             .padding(.vertical, AppConstants.Spacing.md)
             .background(AppConstants.Colors.primary)
+            .cornerRadius(AppConstants.UI.cornerRadius)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(AppConstants.Animation.easeInOut, value: configuration.isPressed)
+    }
+}
+
+struct StopButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(AppConstants.Fonts.headline)
+            .foregroundColor(.white)
+            .padding(.horizontal, AppConstants.Spacing.lg)
+            .padding(.vertical, AppConstants.Spacing.md)
+            .background(AppConstants.Colors.error)
             .cornerRadius(AppConstants.UI.cornerRadius)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .animation(AppConstants.Animation.easeInOut, value: configuration.isPressed)

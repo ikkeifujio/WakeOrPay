@@ -17,6 +17,8 @@ class SoundService: ObservableObject {
     
     private var audioPlayer: AVAudioPlayer?
     private var hapticFeedback: UIImpactFeedbackGenerator?
+    private var alarmTimer: Timer?
+    private var alarmDuration: TimeInterval = 30.0 // 30秒間のアラーム
     
     private init() {
         setupAudioSession()
@@ -25,7 +27,7 @@ class SoundService: ObservableObject {
     
     private func setupAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowBluetooth, .allowBluetoothA2DP])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("オーディオセッションの設定に失敗: \(error)")
@@ -40,6 +42,12 @@ class SoundService: ObservableObject {
     func playAlarmSound(_ soundName: String, volume: Float = 0.8) {
         stopAlarmSound()
         
+        // オーディオセッションを再設定
+        setupAudioSession()
+        
+        // 30秒間のアラームタイマーを設定
+        startAlarmTimer()
+        
         guard let soundURL = Bundle.main.url(forResource: soundName, withExtension: "wav") else {
             print("音声ファイルが見つかりません: \(soundName)")
             playDefaultSound(volume: volume)
@@ -50,12 +58,17 @@ class SoundService: ObservableObject {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer?.volume = volume
             audioPlayer?.numberOfLoops = -1 // 無限ループ
-            audioPlayer?.play()
+            audioPlayer?.prepareToPlay()
             
-            isPlaying = true
-            currentVolume = volume
-            
-            print("アラーム音を再生開始: \(soundName)")
+            let success = audioPlayer?.play() ?? false
+            if success {
+                isPlaying = true
+                currentVolume = volume
+                print("アラーム音を再生開始: \(soundName) (30秒間)")
+            } else {
+                print("音声再生に失敗")
+                playDefaultSound(volume: volume)
+            }
         } catch {
             print("音声再生に失敗: \(error)")
             playDefaultSound(volume: volume)
@@ -63,8 +76,11 @@ class SoundService: ObservableObject {
     }
     
     private func playDefaultSound(volume: Float) {
-        // システム音を使用
-        AudioServicesPlaySystemSound(1005) // アラーム音
+        // 30秒間のアラームタイマーを設定
+        startAlarmTimer()
+        
+        // システム音を使用（30秒間繰り返し）
+        playSystemAlarmRepeatedly()
         isPlaying = true
         currentVolume = volume
     }
@@ -72,6 +88,8 @@ class SoundService: ObservableObject {
     func stopAlarmSound() {
         audioPlayer?.stop()
         audioPlayer = nil
+        alarmTimer?.invalidate()
+        alarmTimer = nil
         isPlaying = false
         print("アラーム音を停止")
     }
@@ -106,6 +124,71 @@ class SoundService: ObservableObject {
     
     func getAvailableSounds() -> [(String, String)] {
         return SoundService.availableSounds.map { ($0.key, $0.value) }
+    }
+    
+    // MARK: - Alarm Timer Methods
+    
+    private func startAlarmTimer() {
+        alarmTimer?.invalidate()
+        alarmTimer = Timer.scheduledTimer(withTimeInterval: alarmDuration, repeats: false) { [weak self] _ in
+            self?.stopAlarmSound()
+        }
+    }
+    
+    private func playSystemAlarmRepeatedly() {
+        // システム音を1秒間隔で30秒間繰り返し
+        var count = 0
+        let maxCount = Int(alarmDuration) // 1秒間隔
+        
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            AudioServicesPlaySystemSound(1005) // アラーム音
+            count += 1
+            
+            if count >= maxCount || !self.isPlaying {
+                timer.invalidate()
+            }
+        }
+    }
+    
+    // MARK: - Alarm Duration Settings
+    
+    func setAlarmDuration(_ duration: TimeInterval) {
+        alarmDuration = duration
+    }
+    
+    func getAlarmDuration() -> TimeInterval {
+        return alarmDuration
+    }
+    
+    // MARK: - Simple Test Methods
+    
+    func playSimpleTestSound() {
+        stopAlarmSound()
+        
+        // シンプルなシステム音を1回だけ再生
+        AudioServicesPlaySystemSound(1005)
+        print("テスト音を再生しました")
+    }
+    
+    func playTestAlarm() {
+        stopAlarmSound()
+        setupAudioSession()
+        
+        // 3秒間のテストアラーム
+        let testDuration: TimeInterval = 3.0
+        var count = 0
+        let maxCount = Int(testDuration)
+        
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            AudioServicesPlaySystemSound(1005)
+            count += 1
+            print("テストアラーム: \(count)/\(maxCount)")
+            
+            if count >= maxCount {
+                timer.invalidate()
+                print("テストアラーム終了")
+            }
+        }
     }
 }
 

@@ -6,16 +6,30 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
+    @StateObject private var alarmService = AlarmService.shared
+    @StateObject private var notificationService = NotificationService.shared
+    @State private var showingAlarmView = false
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        AlarmListView()
+            .environmentObject(alarmService)
+            .environmentObject(notificationService)
+            .onAppear {
+                setupApp()
+            }
+    }
+    
+    private func setupApp() {
+        // 通知カテゴリの設定
+        notificationService.setupNotificationCategories()
+        
+        // 通知権限のリクエスト
+        Task {
+            await notificationService.requestPermission()
         }
-        .padding()
     }
 }
 

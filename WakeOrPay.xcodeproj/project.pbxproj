@@ -11,6 +11,23 @@
 		801A95732E76959900A9AC63 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 801A95722E76959900A9AC63 /* ContentView.swift */; };
 		801A95752E76959B00A9AC63 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 801A95742E76959B00A9AC63 /* Assets.xcassets */; };
 		801A95782E76959B00A9AC63 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 801A95772E76959B00A9AC63 /* Preview Assets.xcassets */; };
+		80AE5BBB2E76A3FC0062618B /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BB82E76A3FC0062618B /* Alarm.swift */; };
+		80AE5BBC2E76A3FC0062618B /* AlarmSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BB92E76A3FC0062618B /* AlarmSettings.swift */; };
+		80AE5BC12E76A40D0062618B /* AlarmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BBD2E76A40D0062618B /* AlarmService.swift */; };
+		80AE5BC22E76A40D0062618B /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BBE2E76A40D0062618B /* NotificationService.swift */; };
+		80AE5BC32E76A40D0062618B /* SoundService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BBF2E76A40D0062618B /* SoundService.swift */; };
+		80AE5BCF2E76A42E0062618B /* AddAlarmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BC42E76A42E0062618B /* AddAlarmView.swift */; };
+		80AE5BD02E76A42E0062618B /* AlarmDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BC52E76A42E0062618B /* AlarmDetailView.swift */; };
+		80AE5BD12E76A42E0062618B /* AlarmDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BC62E76A42E0062618B /* AlarmDetailViewModel.swift */; };
+		80AE5BD22E76A42E0062618B /* AlarmListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BC82E76A42E0062618B /* AlarmListView.swift */; };
+		80AE5BD32E76A42E0062618B /* AlarmListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BC92E76A42E0062618B /* AlarmListViewModel.swift */; };
+		80AE5BD42E76A42E0062618B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BCB2E76A42E0062618B /* SettingsView.swift */; };
+		80AE5BD52E76A42E0062618B /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BCC2E76A42E0062618B /* SettingsViewModel.swift */; };
+		80AE5BDC2E76A43B0062618B /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BD62E76A43B0062618B /* AppConstants.swift */; };
+		80AE5BDD2E76A43B0062618B /* DateUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BD82E76A43B0062618B /* DateUtils.swift */; };
+		80AE5BDE2E76A43B0062618B /* QRCodeUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BD92E76A43B0062618B /* QRCodeUtils.swift */; };
+		80AE5BE62E76A4480062618B /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BDF2E76A4480062618B /* AppColors.swift */; };
+		80AE5BEB2E76A8B20062618B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80AE5BE92E76A8B20062618B /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +36,23 @@
 		801A95722E76959900A9AC63 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		801A95742E76959B00A9AC63 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		801A95772E76959B00A9AC63 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		80AE5BB82E76A3FC0062618B /* Alarm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
+		80AE5BB92E76A3FC0062618B /* AlarmSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlarmSettings.swift; sourceTree = "<group>"; };
+		80AE5BBD2E76A40D0062618B /* AlarmService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlarmService.swift; sourceTree = "<group>"; };
+		80AE5BBE2E76A40D0062618B /* NotificationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		80AE5BBF2E76A40D0062618B /* SoundService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SoundService.swift; sourceTree = "<group>"; };
+		80AE5BC42E76A42E0062618B /* AddAlarmView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddAlarmView.swift; sourceTree = "<group>"; };
+		80AE5BC52E76A42E0062618B /* AlarmDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlarmDetailView.swift; sourceTree = "<group>"; };
+		80AE5BC62E76A42E0062618B /* AlarmDetailViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlarmDetailViewModel.swift; sourceTree = "<group>"; };
+		80AE5BC82E76A42E0062618B /* AlarmListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlarmListView.swift; sourceTree = "<group>"; };
+		80AE5BC92E76A42E0062618B /* AlarmListViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlarmListViewModel.swift; sourceTree = "<group>"; };
+		80AE5BCB2E76A42E0062618B /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		80AE5BCC2E76A42E0062618B /* SettingsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		80AE5BD62E76A43B0062618B /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
+		80AE5BD82E76A43B0062618B /* DateUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateUtils.swift; sourceTree = "<group>"; };
+		80AE5BD92E76A43B0062618B /* QRCodeUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeUtils.swift; sourceTree = "<group>"; };
+		80AE5BDF2E76A4480062618B /* AppColors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		80AE5BE92E76A8B20062618B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +85,12 @@
 		801A956F2E76959900A9AC63 /* WakeOrPay */ = {
 			isa = PBXGroup;
 			children = (
+				80AE5BEA2E76A8B20062618B /* Preview Content */,
+				80AE5BE52E76A4480062618B /* Resources */,
+				80AE5BDB2E76A43B0062618B /* Shared */,
+				80AE5BCE2E76A42E0062618B /* Features */,
+				80AE5BC02E76A40D0062618B /* Services */,
+				80AE5BBA2E76A3FC0062618B /* Models */,
 				801A95702E76959900A9AC63 /* WakeOrPayApp.swift */,
 				801A95722E76959900A9AC63 /* ContentView.swift */,
 				801A95742E76959B00A9AC63 /* Assets.xcassets */,
@@ -63,6 +103,129 @@
 			isa = PBXGroup;
 			children = (
 				801A95772E76959B00A9AC63 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		80AE5BBA2E76A3FC0062618B /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BB82E76A3FC0062618B /* Alarm.swift */,
+				80AE5BB92E76A3FC0062618B /* AlarmSettings.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		80AE5BC02E76A40D0062618B /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BBD2E76A40D0062618B /* AlarmService.swift */,
+				80AE5BBE2E76A40D0062618B /* NotificationService.swift */,
+				80AE5BBF2E76A40D0062618B /* SoundService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		80AE5BC72E76A42E0062618B /* AlarmDetail */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BC42E76A42E0062618B /* AddAlarmView.swift */,
+				80AE5BC52E76A42E0062618B /* AlarmDetailView.swift */,
+				80AE5BC62E76A42E0062618B /* AlarmDetailViewModel.swift */,
+			);
+			path = AlarmDetail;
+			sourceTree = "<group>";
+		};
+		80AE5BCA2E76A42E0062618B /* AlarmList */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BC82E76A42E0062618B /* AlarmListView.swift */,
+				80AE5BC92E76A42E0062618B /* AlarmListViewModel.swift */,
+			);
+			path = AlarmList;
+			sourceTree = "<group>";
+		};
+		80AE5BCD2E76A42E0062618B /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BCB2E76A42E0062618B /* SettingsView.swift */,
+				80AE5BCC2E76A42E0062618B /* SettingsViewModel.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		80AE5BCE2E76A42E0062618B /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BC72E76A42E0062618B /* AlarmDetail */,
+				80AE5BCA2E76A42E0062618B /* AlarmList */,
+				80AE5BCD2E76A42E0062618B /* Settings */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		80AE5BD72E76A43B0062618B /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BD62E76A43B0062618B /* AppConstants.swift */,
+			);
+			path = Constants;
+			sourceTree = "<group>";
+		};
+		80AE5BDA2E76A43B0062618B /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BD82E76A43B0062618B /* DateUtils.swift */,
+				80AE5BD92E76A43B0062618B /* QRCodeUtils.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		80AE5BDB2E76A43B0062618B /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BD72E76A43B0062618B /* Constants */,
+				80AE5BDA2E76A43B0062618B /* Utils */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		80AE5BE02E76A4480062618B /* Colors */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BDF2E76A4480062618B /* AppColors.swift */,
+			);
+			path = Colors;
+			sourceTree = "<group>";
+		};
+		80AE5BE22E76A4480062618B /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Icons;
+			sourceTree = "<group>";
+		};
+		80AE5BE42E76A4480062618B /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Sounds;
+			sourceTree = "<group>";
+		};
+		80AE5BE52E76A4480062618B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BE02E76A4480062618B /* Colors */,
+				80AE5BE22E76A4480062618B /* Icons */,
+				80AE5BE42E76A4480062618B /* Sounds */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		80AE5BEA2E76A8B20062618B /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				80AE5BE92E76A8B20062618B /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -126,6 +289,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				801A95782E76959B00A9AC63 /* Preview Assets.xcassets in Resources */,
+				80AE5BEB2E76A8B20062618B /* Preview Assets.xcassets in Resources */,
 				801A95752E76959B00A9AC63 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -137,8 +301,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				80AE5BBC2E76A3FC0062618B /* AlarmSettings.swift in Sources */,
+				80AE5BC12E76A40D0062618B /* AlarmService.swift in Sources */,
+				80AE5BC32E76A40D0062618B /* SoundService.swift in Sources */,
+				80AE5BD22E76A42E0062618B /* AlarmListView.swift in Sources */,
+				80AE5BDC2E76A43B0062618B /* AppConstants.swift in Sources */,
+				80AE5BD32E76A42E0062618B /* AlarmListViewModel.swift in Sources */,
+				80AE5BDE2E76A43B0062618B /* QRCodeUtils.swift in Sources */,
 				801A95732E76959900A9AC63 /* ContentView.swift in Sources */,
 				801A95712E76959900A9AC63 /* WakeOrPayApp.swift in Sources */,
+				80AE5BE62E76A4480062618B /* AppColors.swift in Sources */,
+				80AE5BD02E76A42E0062618B /* AlarmDetailView.swift in Sources */,
+				80AE5BDD2E76A43B0062618B /* DateUtils.swift in Sources */,
+				80AE5BC22E76A40D0062618B /* NotificationService.swift in Sources */,
+				80AE5BCF2E76A42E0062618B /* AddAlarmView.swift in Sources */,
+				80AE5BBB2E76A3FC0062618B /* Alarm.swift in Sources */,
+				80AE5BD12E76A42E0062618B /* AlarmDetailViewModel.swift in Sources */,
+				80AE5BD42E76A42E0062618B /* SettingsView.swift in Sources */,
+				80AE5BD52E76A42E0062618B /* SettingsViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,6 +452,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"WakeOrPay/Preview Content\"";
+				DEVELOPMENT_TEAM = 68L878M759;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -300,6 +481,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"WakeOrPay/Preview Content\"";
+				DEVELOPMENT_TEAM = 68L878M759;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

@@ -8,6 +8,7 @@
 import Foundation
 import AVFoundation
 import UIKit
+import UserNotifications
 
 class SoundService: ObservableObject {
     static let shared = SoundService()
@@ -40,6 +41,7 @@ class SoundService: ObservableObject {
     }
     
     func playAlarmSound(_ soundName: String, volume: Float = 0.8) {
+        print("playAlarmSound呼び出し: \(soundName), volume: \(volume)")
         stopAlarmSound()
         
         // オーディオセッションを再設定
@@ -48,11 +50,14 @@ class SoundService: ObservableObject {
         // 30秒間のアラームタイマーを設定
         startAlarmTimer()
         
+        // 音声ファイルが存在するかチェック
         guard let soundURL = Bundle.main.url(forResource: soundName, withExtension: "wav") else {
-            print("音声ファイルが見つかりません: \(soundName)")
+            print("音声ファイルが見つかりません: \(soundName).wav - デフォルト音を使用")
             playDefaultSound(volume: volume)
             return
         }
+        
+        print("音声ファイルが見つかりました: \(soundURL)")
         
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
@@ -66,16 +71,17 @@ class SoundService: ObservableObject {
                 currentVolume = volume
                 print("アラーム音を再生開始: \(soundName) (30秒間)")
             } else {
-                print("音声再生に失敗")
+                print("音声再生に失敗 - デフォルト音を使用")
                 playDefaultSound(volume: volume)
             }
         } catch {
-            print("音声再生に失敗: \(error)")
+            print("音声再生に失敗: \(error) - デフォルト音を使用")
             playDefaultSound(volume: volume)
         }
     }
     
     private func playDefaultSound(volume: Float) {
+        print("デフォルト音を再生開始")
         // 30秒間のアラームタイマーを設定
         startAlarmTimer()
         
@@ -83,6 +89,7 @@ class SoundService: ObservableObject {
         playSystemAlarmRepeatedly()
         isPlaying = true
         currentVolume = volume
+        print("デフォルト音再生完了")
     }
     
     func stopAlarmSound() {
@@ -136,16 +143,19 @@ class SoundService: ObservableObject {
     }
     
     private func playSystemAlarmRepeatedly() {
+        print("システムアラーム音を繰り返し再生開始")
         // システム音を1秒間隔で30秒間繰り返し
         var count = 0
         let maxCount = Int(alarmDuration) // 1秒間隔
         
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+            print("システム音再生: \(count + 1)/\(maxCount)")
             AudioServicesPlaySystemSound(1005) // アラーム音
             count += 1
             
-            if count >= maxCount || !self.isPlaying {
+            if count >= maxCount || !(self?.isPlaying ?? false) {
                 timer.invalidate()
+                print("システムアラーム音繰り返し終了")
             }
         }
     }

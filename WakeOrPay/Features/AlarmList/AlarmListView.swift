@@ -7,33 +7,40 @@
 
 import SwiftUI
 import UIKit
+import Foundation
+import AVFoundation
 
 struct AlarmListView: View {
     @StateObject private var viewModel = AlarmListViewModel()
     @State private var showingSettings = false
-    @State private var sortType: SortType = .time
+    @State private var showingQRScanner = false
+    @State private var showingQRAlert = false
+    @State private var qrCodeMessage = ""
     
     var body: some View {
         NavigationView {
             ZStack {
-                AppConstants.Colors.background
+                Color(.systemBackground)
                     .ignoresSafeArea()
                 
-            if viewModel.isLoading {
-                ProgressView("読み込み中...")
-                    .font(AppConstants.Fonts.body)
-            } else if viewModel.alarms.isEmpty {
-                emptyStateView
-            } else {
-                VStack {
-                    // アラーム再生中の停止ボタン
-                    if AlarmService.shared.isPlaying {
-                        alarmStopView
+                if viewModel.isLoading {
+                    ProgressView("読み込み中...")
+                        .font(.body)
+                } else if viewModel.alarms.isEmpty {
+                    emptyStateView
+                } else {
+                    VStack {
+                        // テストボタン
+                        testButtonsView
+                        
+                        // アラーム再生中の停止ボタン
+                        if AlarmService.shared.isPlaying {
+                            alarmStopView
+                        }
+                        
+                        alarmListView
                     }
-                    
-                    alarmListView
                 }
-            }
             }
             .navigationTitle("WakeOrPay")
             .navigationBarTitleDisplayMode(.large)
@@ -42,27 +49,13 @@ struct AlarmListView: View {
                     Button("設定") {
                         showingSettings = true
                     }
-                    .foregroundColor(AppConstants.Colors.primary)
+                    .foregroundColor(.blue)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        Button("音テスト") {
-                            SoundService.shared.playSimpleTestSound()
-                        }
-                        .font(.caption)
-                        .foregroundColor(AppConstants.Colors.secondary)
-                        
-                        Button("アラームテスト") {
-                            SoundService.shared.playTestAlarm()
-                        }
-                        .font(.caption)
-                        .foregroundColor(AppConstants.Colors.warning)
-                        
-                        Button(action: viewModel.showAddAlarm) {
-                            Image(systemName: "plus")
-                                .foregroundColor(AppConstants.Colors.primary)
-                        }
+                    Button(action: viewModel.showAddAlarm) {
+                        Image(systemName: "plus")
+                            .foregroundColor(.blue)
                     }
                 }
             }
@@ -73,6 +66,14 @@ struct AlarmListView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
+            }
+            .sheet(isPresented: $showingQRScanner) {
+                QRScannerView()
+            }
+            .alert("QRコード", isPresented: $showingQRAlert) {
+                Button("OK") { }
+            } message: {
+                Text(qrCodeMessage)
             }
             .alert("エラー", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("OK") {
@@ -99,18 +100,18 @@ struct AlarmListView: View {
     // MARK: - Empty State
     
     private var emptyStateView: some View {
-        VStack(spacing: AppConstants.Spacing.lg) {
+        VStack(spacing: 24) {
             Image(systemName: "alarm")
                 .font(.system(size: 60))
-                .foregroundColor(AppConstants.Colors.secondary)
+                .foregroundColor(.orange)
             
             Text("アラームがありません")
-                .font(AppConstants.Fonts.title2)
-                .foregroundColor(AppConstants.Colors.text)
+                .font(.title2)
+                .foregroundColor(.primary)
             
             Text("右上の + ボタンから\nアラームを追加してください")
-                .font(AppConstants.Fonts.body)
-                .foregroundColor(AppConstants.Colors.secondaryText)
+                .font(.body)
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
             
             Button("アラームを追加") {
@@ -118,7 +119,7 @@ struct AlarmListView: View {
             }
             .buttonStyle(PrimaryButtonStyle())
         }
-        .padding(AppConstants.Spacing.lg)
+        .padding(24)
     }
     
     // MARK: - Alarm List
@@ -129,9 +130,6 @@ struct AlarmListView: View {
             if let nextAlarm = viewModel.nextAlarm {
                 nextAlarmCard(nextAlarm)
             }
-            
-            // ソート選択
-            sortPicker
             
             // アラーム一覧
             List {
@@ -147,7 +145,7 @@ struct AlarmListView: View {
                         Button("複製") {
                             viewModel.duplicateAlarm(alarm)
                         }
-                        .tint(AppConstants.Colors.secondary)
+                        .tint(.orange)
                     }
                 }
                 .onDelete(perform: viewModel.deleteAlarm)
@@ -162,14 +160,14 @@ struct AlarmListView: View {
     // MARK: - Next Alarm Card
     
     private func nextAlarmCard(_ alarm: Alarm) -> some View {
-        VStack(alignment: .leading, spacing: AppConstants.Spacing.sm) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "clock.fill")
-                    .foregroundColor(AppConstants.Colors.primary)
+                    .foregroundColor(.blue)
                 
                 Text("次のアラーム")
-                    .font(AppConstants.Fonts.headline)
-                    .foregroundColor(AppConstants.Colors.text)
+                    .font(.headline)
+                    .foregroundColor(.primary)
                 
                 Spacer()
             }
@@ -177,18 +175,18 @@ struct AlarmListView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(alarm.title)
-                        .font(AppConstants.Fonts.title2)
-                        .foregroundColor(AppConstants.Colors.text)
+                        .font(.title2)
+                        .foregroundColor(.primary)
                     
                     Text(alarm.timeString)
-                        .font(AppConstants.Fonts.largeTitle)
+                        .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(AppConstants.Colors.primary)
+                        .foregroundColor(.blue)
                     
                     if !alarm.repeatDays.isEmpty {
                         Text(alarm.repeatString)
-                            .font(AppConstants.Fonts.caption)
-                            .foregroundColor(AppConstants.Colors.secondaryText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
                 
@@ -197,29 +195,107 @@ struct AlarmListView: View {
                 Button(action: { viewModel.toggleAlarm(alarm) }) {
                     Image(systemName: alarm.isEnabled ? "pause.circle.fill" : "play.circle.fill")
                         .font(.system(size: 30))
-                        .foregroundColor(alarm.isEnabled ? AppConstants.Colors.warning : AppConstants.Colors.success)
+                        .foregroundColor(alarm.isEnabled ? .yellow : .green)
                 }
             }
         }
-        .padding(AppConstants.Spacing.md)
-        .background(AppConstants.Colors.secondaryBackground)
-        .cornerRadius(AppConstants.UI.cornerRadius)
-        .padding(.horizontal, AppConstants.Spacing.md)
-        .padding(.top, AppConstants.Spacing.sm)
+        .padding(16)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+    }
+    
+    // MARK: - Test Buttons View
+    
+    private var testButtonsView: some View {
+        HStack(spacing: 8) {
+            Button("音テスト") {
+                SoundService.shared.playSimpleTestSound()
+            }
+            .font(.caption)
+            .foregroundColor(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(.orange)
+            .cornerRadius(12)
+            
+            Button("アラームテスト") {
+                print("アラームテストボタンがタップされました")
+                // QRコード付きのテストアラームを開始
+                let testAlarm = Alarm(
+                    title: "テストアラーム",
+                    time: Date(),
+                    isEnabled: true,
+                    soundName: "default",
+                    volume: 0.8,
+                    qrCodeRequired: true
+                )
+                print("テストアラームを作成: \(testAlarm.title) (QRコード必要)")
+                AlarmService.shared.startAlarm(testAlarm)
+            }
+            .font(.caption)
+            .foregroundColor(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(.yellow)
+            .cornerRadius(12)
+            
+            Button("QRスキャン") {
+                showingQRScanner = true
+            }
+            .font(.caption)
+            .foregroundColor(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(.cyan)
+            .cornerRadius(12)
+            
+            Button("QR生成") {
+                // テスト用のQRコードを生成してコンソールに表示
+                let testAlarmId = UUID().uuidString
+                let qrCodeString = "WakeOrPay:Stop:\(testAlarmId)"
+                print("テスト用QRコード: \(qrCodeString)")
+                
+                // 簡単なアラートで表示
+                showingQRAlert = true
+                qrCodeMessage = qrCodeString
+            }
+            .font(.caption)
+            .foregroundColor(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(.purple)
+            .cornerRadius(12)
+            
+            Button("簡単テスト") {
+                print("簡単テストボタンがタップされました")
+                // 最もシンプルな音テスト
+                SoundService.shared.playSimpleTestSound()
+            }
+            .font(.caption)
+            .foregroundColor(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(.red)
+            .cornerRadius(12)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
     }
     
     // MARK: - Alarm Stop View
     
     private var alarmStopView: some View {
-        VStack(spacing: AppConstants.Spacing.md) {
+        VStack(spacing: 16) {
             Text("アラームが鳴っています")
-                .font(AppConstants.Fonts.headline)
-                .foregroundColor(AppConstants.Colors.error)
+                .font(.headline)
+                .foregroundColor(.red)
             
             if let currentAlarm = AlarmService.shared.currentAlarm {
                 Text(currentAlarm.title)
-                    .font(AppConstants.Fonts.title2)
-                    .foregroundColor(AppConstants.Colors.text)
+                    .font(.title2)
+                    .foregroundColor(.primary)
             }
             
             Button("アラームを停止") {
@@ -227,26 +303,10 @@ struct AlarmListView: View {
             }
             .buttonStyle(StopButtonStyle())
         }
-        .padding(AppConstants.Spacing.lg)
-        .background(AppConstants.Colors.error.opacity(0.1))
-        .cornerRadius(AppConstants.UI.cornerRadius)
-        .padding(.horizontal, AppConstants.Spacing.md)
-    }
-    
-    // MARK: - Sort Picker
-    
-    private var sortPicker: some View {
-        Picker("ソート", selection: $sortType) {
-            ForEach(SortType.allCases, id: \.self) { type in
-                Text(type.rawValue).tag(type)
-            }
-        }
-        .pickerStyle(SegmentedPickerStyle())
-        .padding(.horizontal, AppConstants.Spacing.md)
-        .padding(.vertical, AppConstants.Spacing.sm)
-        .onChange(of: sortType) { newType in
-            viewModel.sortAlarms(by: newType)
-        }
+        .padding(24)
+        .background(.red.opacity(0.1))
+        .cornerRadius(12)
+        .padding(.horizontal, 16)
     }
 }
 
@@ -261,61 +321,275 @@ struct AlarmRowView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(alarm.title)
-                        .font(AppConstants.Fonts.headline)
-                        .foregroundColor(AppConstants.Colors.text)
+                        .font(.headline)
+                        .foregroundColor(.primary)
                         .lineLimit(1)
                     
                     Text(alarm.timeString)
-                        .font(AppConstants.Fonts.title2)
+                        .font(.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(AppConstants.Colors.primary)
+                        .foregroundColor(.blue)
                     
                     if !alarm.repeatDays.isEmpty {
                         Text(alarm.repeatString)
-                            .font(AppConstants.Fonts.caption)
-                            .foregroundColor(AppConstants.Colors.secondaryText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
                 
                 Spacer()
                 
-                Toggle("", isOn: .constant(alarm.isEnabled))
-                    .labelsHidden()
-                    .disabled(true)
+                Image(systemName: alarm.isEnabled ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundColor(alarm.isEnabled ? .green : .red)
+                    .font(.title2)
             }
-            .padding(.vertical, AppConstants.Spacing.xs)
+            .padding(.vertical, 4)
         }
         .buttonStyle(PlainButtonStyle())
     }
 }
 
-// MARK: - Primary Button Style
+// MARK: - Button Styles
 
 struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(AppConstants.Fonts.headline)
+            .font(.headline)
             .foregroundColor(.white)
-            .padding(.horizontal, AppConstants.Spacing.lg)
-            .padding(.vertical, AppConstants.Spacing.md)
-            .background(AppConstants.Colors.primary)
-            .cornerRadius(AppConstants.UI.cornerRadius)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
+            .background(.blue)
+            .cornerRadius(12)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(AppConstants.Animation.easeInOut, value: configuration.isPressed)
+            .animation(.easeInOut(duration: 0.3), value: configuration.isPressed)
     }
 }
 
 struct StopButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(AppConstants.Fonts.headline)
+            .font(.headline)
             .foregroundColor(.white)
-            .padding(.horizontal, AppConstants.Spacing.lg)
-            .padding(.vertical, AppConstants.Spacing.md)
-            .background(AppConstants.Colors.error)
-            .cornerRadius(AppConstants.UI.cornerRadius)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
+            .background(.red)
+            .cornerRadius(12)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(AppConstants.Animation.easeInOut, value: configuration.isPressed)
+            .animation(.easeInOut(duration: 0.3), value: configuration.isPressed)
+    }
+}
+
+// MARK: - QR Code Scanner Service
+
+class QRCodeScannerService: NSObject, ObservableObject {
+    static let shared = QRCodeScannerService()
+    
+    @Published var isScanning: Bool = false
+    @Published var scannedCode: String = ""
+    
+    private var captureSession: AVCaptureSession?
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+    
+    private override init() {
+        super.init()
+    }
+    
+    // MARK: - QR Code Scanning
+    
+    func startScanning() -> AVCaptureVideoPreviewLayer? {
+        guard !isScanning else { return previewLayer }
+        
+        let captureSession = AVCaptureSession()
+        
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
+            print("カメラにアクセスできません")
+            return nil
+        }
+        
+        do {
+            let videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
+            
+            if captureSession.canAddInput(videoInput) {
+                captureSession.addInput(videoInput)
+            }
+            
+            let metadataOutput = AVCaptureMetadataOutput()
+            
+            if captureSession.canAddOutput(metadataOutput) {
+                captureSession.addOutput(metadataOutput)
+                
+                metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+                metadataOutput.metadataObjectTypes = [.qr]
+            }
+            
+            let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+            previewLayer.videoGravity = .resizeAspectFill
+            
+            self.captureSession = captureSession
+            self.previewLayer = previewLayer
+            self.isScanning = true
+            
+            DispatchQueue.global(qos: .background).async {
+                captureSession.startRunning()
+            }
+            
+            print("QRコードスキャンを開始しました")
+            return previewLayer
+            
+        } catch {
+            print("カメラセットアップエラー: \(error)")
+            return nil
+        }
+    }
+    
+    func stopScanning() {
+        guard isScanning else { return }
+        
+        captureSession?.stopRunning()
+        captureSession = nil
+        previewLayer = nil
+        isScanning = false
+        
+        print("QRコードスキャンを停止しました")
+    }
+    
+    // MARK: - QR Code Validation
+    
+    func validateQRCode(_ code: String) -> Bool {
+        guard code.hasPrefix("WakeOrPay:Stop:") else { return false }
+        
+        let alarmIdString = String(code.dropFirst("WakeOrPay:Stop:".count))
+        guard UUID(uuidString: alarmIdString) != nil else { return false }
+        
+        scannedCode = code
+        return true
+    }
+}
+
+// MARK: - AVCaptureMetadataOutputObjectsDelegate
+
+extension QRCodeScannerService: AVCaptureMetadataOutputObjectsDelegate {
+    func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        guard let metadataObject = metadataObjects.first,
+              let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
+              let stringValue = readableObject.stringValue else {
+            return
+        }
+        
+        if validateQRCode(stringValue) {
+            stopScanning()
+            
+            // アラームサービスにQRコード検証を通知
+            DispatchQueue.main.async {
+                let isValid = AlarmService.shared.validateQRCode(stringValue)
+                if isValid {
+                    print("QRコードが有効です: \(stringValue)")
+                } else {
+                    print("QRコードが無効です: \(stringValue)")
+                }
+            }
+        }
+    }
+}
+
+// MARK: - QR Scanner View
+
+struct QRScannerView: View {
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var scannerService = QRCodeScannerService.shared
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            if let previewLayer = scannerService.startScanning() {
+                QRCodePreviewView(previewLayer: previewLayer)
+            } else {
+                VStack(spacing: 20) {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.white)
+                    
+                    Text("カメラにアクセスできません")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    
+                    Text("設定でカメラのアクセス許可を確認してください")
+                        .font(.body)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            
+            VStack {
+                Spacer()
+                
+                HStack {
+                    Button("キャンセル") {
+                        scannerService.stopScanning()
+                        dismiss()
+                    }
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(10)
+                    
+                    Spacer()
+                    
+                    VStack {
+                        Text("QRコードをスキャン")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        
+                        Text("アラーム停止用のQRコードを\nカメラにかざしてください")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding()
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(10)
+                    
+                    Spacer()
+                    
+                    Button("手動入力") {
+                        // 手動入力機能（将来実装）
+                        alertMessage = "手動入力機能は実装予定です"
+                        showingAlert = true
+                    }
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(10)
+                }
+                .padding()
+            }
+        }
+        .navigationBarHidden(true)
+        .alert("情報", isPresented: $showingAlert) {
+            Button("OK") { }
+        } message: {
+            Text(alertMessage)
+        }
+        .onDisappear {
+            scannerService.stopScanning()
+        }
+    }
+}
+
+struct QRCodePreviewView: UIViewRepresentable {
+    let previewLayer: AVCaptureVideoPreviewLayer
+    
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.layer.addSublayer(previewLayer)
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {
+        previewLayer.frame = uiView.bounds
     }
 }
 

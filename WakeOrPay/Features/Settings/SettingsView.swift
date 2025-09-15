@@ -7,10 +7,14 @@
 
 import SwiftUI
 import UIKit
+import MessageUI
+import UserNotifications
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = SettingsViewModel()
+    @State private var showingMailComposer = false
+    @State private var showingSMSSettings = false
     
     var body: some View {
         NavigationView {
@@ -30,6 +34,9 @@ struct SettingsView: View {
                     
                     // QRコード設定
                     qrCodeSettingsSection
+                    
+                    // 緊急通知設定
+                    emergencyNotificationSection
                     
                     // その他の設定
                     otherSettingsSection
@@ -58,6 +65,12 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $viewModel.showingAbout) {
                 AboutView()
+            }
+            .sheet(isPresented: $showingMailComposer) {
+                MailComposerView()
+            }
+            .sheet(isPresented: $showingSMSSettings) {
+                SMSSettingsView()
             }
             .alert("エラー", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("OK") {
@@ -173,12 +186,53 @@ struct SettingsView: View {
                 .font(AppConstants.Fonts.body)
             
             if viewModel.settings.qrCodeEnabled {
-                Text("アラーム停止にQRコードのスキャンが必要になります")
+                Text("アラーム停止にQRコードのスキャンが必要になります（3分以内）")
                     .font(AppConstants.Fonts.caption)
                     .foregroundColor(AppConstants.Colors.secondaryText)
             }
         }
     }
+    
+    // MARK: - Emergency Notification Section
+    
+    private var emergencyNotificationSection: some View {
+        Section("緊急通知設定") {
+            // SMS通知設定
+            HStack {
+                Text("SMS通知")
+                    .font(.body)
+                
+                Spacer()
+                
+                if SMSService.shared.canSendSMS() {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                } else {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.red)
+                }
+            }
+            
+            Button("SMS設定") {
+                showingSMSSettings = true
+            }
+            .font(.body)
+            .foregroundColor(.blue)
+            .disabled(!SMSService.shared.canSendSMS())
+            
+            Button("SMSテスト") {
+                SMSService.shared.sendTestSMS()
+            }
+            .font(.body)
+            .foregroundColor(.blue)
+            .disabled(!SMSService.shared.canSendSMS())
+            
+            Text("QRコードスキャンが3分以内に完了しない場合、設定した連絡先にSMSを自動送信します")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+    
     
     // MARK: - Other Settings Section
     
@@ -321,6 +375,246 @@ struct FeatureRowView: View {
             Text(title)
                 .font(AppConstants.Fonts.body)
                 .foregroundColor(AppConstants.Colors.text)
+        }
+    }
+}
+
+// MARK: - Mail Composer View
+
+struct MailComposerView: UIViewControllerRepresentable {
+    @Environment(\.dismiss) private var dismiss
+    
+    func makeUIViewController(context: Context) -> MFMailComposeViewController {
+        let composer = MFMailComposeViewController()
+        composer.mailComposeDelegate = context.coordinator
+        composer.setToRecipients(["emergency@example.com"]) // 実際の緊急連絡先に変更
+        composer.setSubject("WakeOrPay 緊急通知テスト")
+        composer.setMessageBody("これはWakeOrPayアプリからの緊急通知テストです。\n\nQRコードスキャンがタイムアウトしました。", isHTML: false)
+        return composer
+    }
+    
+    func updateUIViewController(_ uiViewController: MFMailComposeViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
+        let parent: MailComposerView
+        
+        init(_ parent: MailComposerView) {
+            self.parent = parent
+        }
+        
+        func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+            parent.dismiss()
+        }
+    }
+}
+
+
+// MARK: - SMS Settings View
+
+struct SMSSettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var phoneNumber: String = ""
+    @State private var message: String = ""
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section("緊急連絡先") {
+                    TextField("電話番号", text: $phoneNumber)
+                        .keyboardType(.phonePad)
+                        .textContentType(.telephoneNumber)
+                    
+                    Text("例: 090-1234-5678")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Section("緊急メッセージ") {
+                    TextField("メッセージ", text: $message, axis: .vertical)
+                        .lineLimit(3...6)
+                    
+                    Text("QRコードスキャンがタイムアウトした場合に送信されるメッセージです")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Section("プレビュー") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("送信先: \(phoneNumber.isEmpty ? "未設定" : phoneNumber)")
+                            .font(.body)
+                        
+                        Text("メッセージ:")
+                            .font(.body)
+                            .fontWeight(.semibold)
+                        
+                        Text(message.isEmpty ? "WakeOrPay緊急通知: アラームが3分以内に停止されませんでした。" : message)
+                            .font(.body)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                    }
+                }
+            }
+            .navigationTitle("SMS設定")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("キャンセル") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("保存") {
+                        saveSettings()
+                    }
+                    .disabled(phoneNumber.isEmpty)
+                }
+            }
+            .onAppear {
+                loadSettings()
+            }
+            .alert("設定保存", isPresented: $showingAlert) {
+                Button("OK") { }
+            } message: {
+                Text(alertMessage)
+            }
+        }
+    }
+    
+    private func loadSettings() {
+        phoneNumber = SMSService.shared.getEmergencyContact() ?? ""
+        message = SMSService.shared.getEmergencyMessage()
+    }
+    
+    private func saveSettings() {
+        SMSService.shared.setEmergencyContact(phoneNumber)
+        SMSService.shared.setEmergencyMessage(message)
+        
+        alertMessage = "SMS設定を保存しました"
+        showingAlert = true
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            dismiss()
+        }
+    }
+}
+
+// MARK: - SMS Service
+
+class SMSService: NSObject, ObservableObject {
+    static let shared = SMSService()
+    
+    private override init() {
+        super.init()
+    }
+    
+    // MARK: - SMS Settings
+    
+    func setEmergencyContact(_ phoneNumber: String) {
+        UserDefaults.standard.set(phoneNumber, forKey: "EMERGENCY_SMS_CONTACT")
+        print("緊急連絡先SMSを設定: \(phoneNumber)")
+    }
+    
+    func getEmergencyContact() -> String? {
+        return UserDefaults.standard.string(forKey: "EMERGENCY_SMS_CONTACT")
+    }
+    
+    func setEmergencyMessage(_ message: String) {
+        UserDefaults.standard.set(message, forKey: "EMERGENCY_SMS_MESSAGE")
+        print("緊急SMSメッセージを設定: \(message)")
+    }
+    
+    func getEmergencyMessage() -> String {
+        return UserDefaults.standard.string(forKey: "EMERGENCY_SMS_MESSAGE") ?? "WakeOrPay緊急通知: アラームが3分以内に停止されませんでした。"
+    }
+    
+    // MARK: - SMS Sending
+    
+    func canSendSMS() -> Bool {
+        return MFMessageComposeViewController.canSendText()
+    }
+    
+    func sendEmergencySMS() {
+        guard canSendSMS() else {
+            print("SMS送信ができません")
+            return
+        }
+        
+        guard let phoneNumber = getEmergencyContact(), !phoneNumber.isEmpty else {
+            print("緊急連絡先が設定されていません")
+            return
+        }
+        
+        let message = getEmergencyMessage()
+        print("緊急SMS送信: \(phoneNumber) - \(message)")
+        
+        // メインスレッドでSMS送信画面を表示
+        DispatchQueue.main.async {
+            self.presentSMSComposer(recipients: [phoneNumber], message: message)
+        }
+    }
+    
+    private func presentSMSComposer(recipients: [String], message: String) {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootViewController = window.rootViewController else {
+            print("SMS送信画面を表示できません")
+            return
+        }
+        
+        let composer = MFMessageComposeViewController()
+        composer.messageComposeDelegate = self
+        composer.recipients = recipients
+        composer.body = message
+        
+        // 最上位のビューコントローラーを取得
+        var topController = rootViewController
+        while let presentedController = topController.presentedViewController {
+            topController = presentedController
+        }
+        
+        topController.present(composer, animated: true)
+    }
+    
+    // MARK: - Test Methods
+    
+    func sendTestSMS() {
+        guard let phoneNumber = getEmergencyContact(), !phoneNumber.isEmpty else {
+            print("テスト用SMS送信: 緊急連絡先が設定されていません")
+            return
+        }
+        
+        let testMessage = "WakeOrPayテスト通知: これはテストメッセージです。"
+        print("テストSMS送信: \(phoneNumber) - \(testMessage)")
+        
+        DispatchQueue.main.async {
+            self.presentSMSComposer(recipients: [phoneNumber], message: testMessage)
+        }
+    }
+}
+
+// MARK: - MFMessageComposeViewControllerDelegate
+
+extension SMSService: MFMessageComposeViewControllerDelegate {
+    func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
+        controller.dismiss(animated: true)
+        
+        switch result {
+        case .cancelled:
+            print("SMS送信がキャンセルされました")
+        case .sent:
+            print("SMS送信が完了しました")
+        case .failed:
+            print("SMS送信に失敗しました")
+        @unknown default:
+            print("SMS送信結果が不明です")
         }
     }
 }

@@ -16,6 +16,8 @@ struct AlarmListView: View {
     @State private var showingQRScanner = false
     @State private var showingQRAlert = false
     @State private var qrCodeMessage = ""
+    @State private var qrCodeData = ""
+    @State private var showingHistory = false // Added for history view
     
     var body: some View {
         NavigationView {
@@ -29,9 +31,9 @@ struct AlarmListView: View {
                 } else if viewModel.alarms.isEmpty {
                     emptyStateView
                 } else {
-                    VStack {
+                    VStack(spacing: 8) {
                         // テストボタン
-                        testButtonsView
+                        qrCodeButtonsView
                         
                         // アラーム再生中の停止ボタン
                         if AlarmService.shared.isPlaying {
@@ -43,13 +45,20 @@ struct AlarmListView: View {
                 }
             }
             .navigationTitle("WakeOrPay")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("設定") {
-                        showingSettings = true
+                    HStack {
+                        Button("設定") {
+                            showingSettings = true
+                        }
+                        .foregroundColor(.blue)
+                        
+                                // Button("履歴") {
+                                //     showingHistory = true
+                                // }
+                                // .foregroundColor(.green)
                     }
-                    .foregroundColor(.blue)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -67,11 +76,17 @@ struct AlarmListView: View {
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
             }
-            .sheet(isPresented: $showingQRScanner) {
-                QRScannerView()
-            }
+                    .sheet(isPresented: $showingQRScanner) {
+                        QRScannerView()
+                    }
+                    // .sheet(isPresented: $showingHistory) {
+                    //     HistoryView()
+                    // }
             .alert("QRコード", isPresented: $showingQRAlert) {
                 Button("OK") { }
+                Button("コピー") {
+                    UIPasteboard.general.string = qrCodeData
+                }
             } message: {
                 Text(qrCodeMessage)
             }
@@ -100,7 +115,10 @@ struct AlarmListView: View {
     // MARK: - Empty State
     
     private var emptyStateView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 16) {
+            // テストボタン
+            qrCodeButtonsView
+            
             Image(systemName: "alarm")
                 .font(.system(size: 60))
                 .foregroundColor(.orange)
@@ -206,43 +224,41 @@ struct AlarmListView: View {
         .padding(.top, 8)
     }
     
-    // MARK: - Test Buttons View
+    // MARK: - QR Code Buttons View
     
-    private var testButtonsView: some View {
+    private var qrCodeButtonsView: some View {
         HStack(spacing: 8) {
-            Button("音テスト") {
-                SoundService.shared.playSimpleTestSound()
-            }
-            .font(.caption)
-            .foregroundColor(.white)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(.orange)
-            .cornerRadius(12)
-            
-            Button("アラームテスト") {
-                print("アラームテストボタンがタップされました")
-                // QRコード付きのテストアラームを開始
-                let testAlarm = Alarm(
-                    title: "テストアラーム",
-                    time: Date(),
-                    isEnabled: true,
-                    soundName: "default",
-                    volume: 0.8,
-                    qrCodeRequired: true
-                )
-                print("テストアラームを作成: \(testAlarm.title) (QRコード必要)")
-                AlarmService.shared.startAlarm(testAlarm)
-            }
-            .font(.caption)
-            .foregroundColor(.white)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(.yellow)
-            .cornerRadius(12)
-            
             Button("QRスキャン") {
-                showingQRScanner = true
+                print("QRスキャンボタンがタップされました")
+                
+                // カメラ権限を事前チェック
+                switch AVCaptureDevice.authorizationStatus(for: .video) {
+                case .authorized:
+                    print("カメラ権限が許可されています - スキャン画面を表示")
+                    showingQRScanner = true
+                case .notDetermined:
+                    print("カメラ権限が未決定です - リクエストしてからスキャン画面を表示")
+                    AVCaptureDevice.requestAccess(for: .video) { granted in
+                        DispatchQueue.main.async {
+                            if granted {
+                                print("カメラ権限が許可されました - スキャン画面を表示")
+                                showingQRScanner = true
+                            } else {
+                                print("カメラ権限が拒否されました")
+                                showingQRAlert = true
+                                qrCodeMessage = "カメラのアクセス許可が必要です。設定で許可してください。"
+                            }
+                        }
+                    }
+                case .denied, .restricted:
+                    print("カメラ権限が拒否または制限されています")
+                    showingQRAlert = true
+                    qrCodeMessage = "カメラのアクセス許可が必要です。設定で許可してください。"
+                @unknown default:
+                    print("未知のカメラ権限状態")
+                    showingQRAlert = true
+                    qrCodeMessage = "カメラのアクセス許可が必要です。設定で許可してください。"
+                }
             }
             .font(.caption)
             .foregroundColor(.white)
@@ -252,14 +268,20 @@ struct AlarmListView: View {
             .cornerRadius(12)
             
             Button("QR生成") {
-                // テスト用のQRコードを生成してコンソールに表示
+                // テスト用のQRコードを生成して表示
                 let testAlarmId = UUID().uuidString
                 let qrCodeString = "WakeOrPay:Stop:\(testAlarmId)"
                 print("テスト用QRコード: \(qrCodeString)")
                 
-                // 簡単なアラートで表示
+                // データを保存
+                qrCodeData = qrCodeString
+                
+                // クリップボードにコピー
+                UIPasteboard.general.string = qrCodeString
+                
+                // アラートで表示
                 showingQRAlert = true
-                qrCodeMessage = qrCodeString
+                qrCodeMessage = "QRコードデータをクリップボードにコピーしました:\n\n\(qrCodeString)\n\nこのデータをQRコード生成アプリで使用してください"
             }
             .font(.caption)
             .foregroundColor(.white)
@@ -267,21 +289,9 @@ struct AlarmListView: View {
             .padding(.vertical, 4)
             .background(.purple)
             .cornerRadius(12)
-            
-            Button("簡単テスト") {
-                print("簡単テストボタンがタップされました")
-                // 最もシンプルな音テスト
-                SoundService.shared.playSimpleTestSound()
-            }
-            .font(.caption)
-            .foregroundColor(.white)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(.red)
-            .cornerRadius(12)
         }
         .padding(.horizontal, 16)
-        .padding(.top, 8)
+        .padding(.top, 4)
     }
     
     // MARK: - Alarm Stop View
@@ -397,40 +407,96 @@ class QRCodeScannerService: NSObject, ObservableObject {
     // MARK: - QR Code Scanning
     
     func startScanning() -> AVCaptureVideoPreviewLayer? {
-        guard !isScanning else { return previewLayer }
+        print("QRスキャン開始を試行中...")
+        guard !isScanning else { 
+            print("既にスキャン中です")
+            return previewLayer 
+        }
         
-        let captureSession = AVCaptureSession()
-        
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
-            print("カメラにアクセスできません")
+        // カメラ権限をチェック
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            print("カメラ権限が許可されています")
+            return setupCamera()
+        case .notDetermined:
+            print("カメラ権限が未決定です。リクエストします...")
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        print("カメラ権限が許可されました")
+                        _ = self?.setupCamera()
+                    } else {
+                        print("カメラ権限が拒否されました")
+                    }
+                }
+            }
+            return nil
+        case .denied, .restricted:
+            print("カメラ権限が拒否または制限されています")
+            return nil
+        @unknown default:
+            print("未知のカメラ権限状態")
             return nil
         }
+    }
+    
+    private func setupCamera() -> AVCaptureVideoPreviewLayer? {
+        print("カメラセットアップ開始")
+        let captureSession = AVCaptureSession()
+        
+        // セッション設定を最適化
+        if captureSession.canSetSessionPreset(.high) {
+            captureSession.sessionPreset = .high
+        }
+        
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
+            print("カメラにアクセスできません - デバイスが見つかりません")
+            return nil
+        }
+        
+        print("カメラデバイスが見つかりました: \(videoCaptureDevice.localizedName)")
         
         do {
             let videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
             
             if captureSession.canAddInput(videoInput) {
                 captureSession.addInput(videoInput)
+                print("ビデオ入力が追加されました")
+            } else {
+                print("ビデオ入力の追加に失敗しました")
+                return nil
             }
             
             let metadataOutput = AVCaptureMetadataOutput()
             
             if captureSession.canAddOutput(metadataOutput) {
                 captureSession.addOutput(metadataOutput)
+                print("メタデータ出力が追加されました")
                 
                 metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
                 metadataOutput.metadataObjectTypes = [.qr]
+                print("QRコード検出が設定されました")
+            } else {
+                print("メタデータ出力の追加に失敗しました")
+                return nil
             }
             
             let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
             previewLayer.videoGravity = .resizeAspectFill
+            print("プレビューレイヤーが作成されました")
             
             self.captureSession = captureSession
             self.previewLayer = previewLayer
             self.isScanning = true
             
-            DispatchQueue.global(qos: .background).async {
+            DispatchQueue.global(qos: .userInitiated).async {
                 captureSession.startRunning()
+                print("カメラセッションが開始されました")
+                
+                // セッションの状態を確認
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    print("セッション状態: \(captureSession.isRunning ? "実行中" : "停止中")")
+                }
             }
             
             print("QRコードスキャンを開始しました")
@@ -470,24 +536,32 @@ class QRCodeScannerService: NSObject, ObservableObject {
 
 extension QRCodeScannerService: AVCaptureMetadataOutputObjectsDelegate {
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        print("QRコード検出を試行中... 検出数: \(metadataObjects.count)")
+        
         guard let metadataObject = metadataObjects.first,
               let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
               let stringValue = readableObject.stringValue else {
+            print("QRコードデータの読み取りに失敗")
             return
         }
         
+        print("QRコードを検出しました: \(stringValue)")
+        
         if validateQRCode(stringValue) {
+            print("QRコードが有効です - スキャンを停止します")
             stopScanning()
             
             // アラームサービスにQRコード検証を通知
             DispatchQueue.main.async {
                 let isValid = AlarmService.shared.validateQRCode(stringValue)
                 if isValid {
-                    print("QRコードが有効です: \(stringValue)")
+                    print("アラームサービスでQRコードが有効と確認されました: \(stringValue)")
                 } else {
-                    print("QRコードが無効です: \(stringValue)")
+                    print("アラームサービスでQRコードが無効と判定されました: \(stringValue)")
                 }
             }
+        } else {
+            print("QRコードが無効です: \(stringValue)")
         }
     }
 }
@@ -501,27 +575,41 @@ struct QRScannerView: View {
     @State private var alertMessage = ""
     
     var body: some View {
-        ZStack {
+        NavigationView {
+            ZStack {
             Color.black.ignoresSafeArea()
             
-            if let previewLayer = scannerService.startScanning() {
-                QRCodePreviewView(previewLayer: previewLayer)
-            } else {
-                VStack(spacing: 20) {
-                    Image(systemName: "camera.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.white)
-                    
-                    Text("カメラにアクセスできません")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    
-                    Text("設定でカメラのアクセス許可を確認してください")
-                        .font(.body)
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
+        if let previewLayer = scannerService.startScanning() {
+            QRCodePreviewView(previewLayer: previewLayer)
+                .onAppear {
+                    print("QRCodePreviewViewが表示されました")
                 }
+        } else {
+            VStack(spacing: 20) {
+                Image(systemName: "camera.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.white)
+                
+                Text("カメラにアクセスできません")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                
+                Text("設定でカメラのアクセス許可を確認してください")
+                    .font(.body)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                
+                Button("権限を確認") {
+                    if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(settingsUrl)
+                    }
+                }
+                .foregroundColor(.blue)
+                .padding()
+                .background(Color.white)
+                .cornerRadius(10)
             }
+        }
             
             VStack {
                 Spacer()
@@ -568,30 +656,35 @@ struct QRScannerView: View {
             }
         }
         .navigationBarHidden(true)
-        .alert("情報", isPresented: $showingAlert) {
-            Button("OK") { }
-        } message: {
-            Text(alertMessage)
-        }
-        .onDisappear {
-            scannerService.stopScanning()
+            .alert("情報", isPresented: $showingAlert) {
+                Button("OK") { }
+            } message: {
+                Text(alertMessage)
+            }
+            .onDisappear {
+                scannerService.stopScanning()
+            }
+            }
         }
     }
-}
 
 struct QRCodePreviewView: UIViewRepresentable {
     let previewLayer: AVCaptureVideoPreviewLayer
     
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
+        view.backgroundColor = UIColor.black
         view.layer.addSublayer(previewLayer)
         return view
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        previewLayer.frame = uiView.bounds
+        DispatchQueue.main.async {
+            self.previewLayer.frame = uiView.bounds
+        }
     }
 }
+
 
 #Preview {
     AlarmListView()

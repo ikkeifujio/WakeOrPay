@@ -44,39 +44,19 @@ class SoundService: ObservableObject {
         print("playAlarmSound呼び出し: \(soundName), volume: \(volume)")
         stopAlarmSound()
         
-        // オーディオセッションを再設定
-        setupAudioSession()
-        
-        // 30秒間のアラームタイマーを設定
-        startAlarmTimer()
-        
-        // 音声ファイルが存在するかチェック
-        guard let soundURL = Bundle.main.url(forResource: soundName, withExtension: "wav") else {
-            print("音声ファイルが見つかりません: \(soundName).wav - デフォルト音を使用")
-            playDefaultSound(volume: volume)
-            return
-        }
-        
-        print("音声ファイルが見つかりました: \(soundURL)")
-        
-        do {
-            audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
-            audioPlayer?.volume = volume
-            audioPlayer?.numberOfLoops = -1 // 無限ループ
-            audioPlayer?.prepareToPlay()
+        // メインスレッドで実行
+        DispatchQueue.main.async {
+            // オーディオセッションを再設定
+            self.setupAudioSession()
             
-            let success = audioPlayer?.play() ?? false
-            if success {
-                isPlaying = true
-                currentVolume = volume
-                print("アラーム音を再生開始: \(soundName) (30秒間)")
-            } else {
-                print("音声再生に失敗 - デフォルト音を使用")
-                playDefaultSound(volume: volume)
-            }
-        } catch {
-            print("音声再生に失敗: \(error) - デフォルト音を使用")
-            playDefaultSound(volume: volume)
+            // 30秒間のアラームタイマーを設定
+            self.startAlarmTimer()
+            
+            // システム音を直接使用（より確実）
+            self.playSystemAlarmRepeatedly()
+            self.isPlaying = true
+            self.currentVolume = volume
+            print("アラーム音を再生開始: \(soundName) (30秒間)")
         }
     }
     

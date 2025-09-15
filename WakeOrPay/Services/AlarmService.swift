@@ -18,6 +18,7 @@ class AlarmService: ObservableObject {
     
     private let alarmsKey = "WakeOrPayAlarms"
     private var cancellables = Set<AnyCancellable>()
+    private var alarmStartTime: Date?
     
     private init() {
         loadAlarms()
@@ -59,6 +60,7 @@ class AlarmService: ObservableObject {
         DispatchQueue.main.async {
             self.currentAlarm = alarm
             self.isPlaying = true
+            self.alarmStartTime = Date() // アラーム開始時刻を記録
             
             // 音声再生（デバッグログ追加）
             print("音声再生開始: \(alarm.soundName)")
@@ -95,8 +97,18 @@ class AlarmService: ObservableObject {
                 QRCodeTimerService.shared.stopQRCodeTimer(for: alarmId)
             }
             
+            // 起床成功を記録
+            if let alarm = self.currentAlarm, let startTime = self.alarmStartTime {
+                let wakeUpTime = Date()
+                let timeToWakeUp = wakeUpTime.timeIntervalSince(startTime)
+                
+                // 履歴機能は後で実装
+                print("起床成功: \(alarm.title) - \(timeToWakeUp)秒")
+            }
+            
             self.isPlaying = false
             self.currentAlarm = nil
+            self.alarmStartTime = nil
             SoundService.shared.stopAlarmSound()
         }
     }
@@ -245,23 +257,31 @@ class QRCodeTimerService: ObservableObject {
         print("QRコードタイマー停止: \(alarmId)")
     }
     
-    private func handleQRCodeTimeout(alarmId: UUID) {
-        guard alarmIds[alarmId] != nil else {
-            print("タイムアウトしたアラームが見つかりません: \(alarmId)")
-            return
-        }
-        
-        print("QRコードスキャンがタイムアウトしました: \(alarmId)")
-        
-        // SMS緊急通知を送信
-        SMSService.shared.sendEmergencySMS()
-        
-        // ローカル通知も送信
-        sendLocalTimeoutNotification()
-        
-        // タイマーを停止
-        stopQRCodeTimer(for: alarmId)
-    }
+            private func handleQRCodeTimeout(alarmId: UUID) {
+                guard alarmIds[alarmId] != nil else {
+                    print("タイムアウトしたアラームが見つかりません: \(alarmId)")
+                    return
+                }
+                
+                print("QRコードスキャンがタイムアウトしました: \(alarmId)")
+                
+                // 起床失敗を記録
+                if let alarm = AlarmService.shared.currentAlarm {
+                    print("起床失敗: \(alarm.title)")
+                }
+                
+                // SMS緊急通知を送信
+                SMSService.shared.sendEmergencySMS()
+                
+                // ローカル通知も送信
+                sendLocalTimeoutNotification()
+                
+                // アラームを停止
+                AlarmService.shared.stopCurrentAlarm()
+                
+                // タイマーを停止
+                stopQRCodeTimer(for: alarmId)
+            }
     
     private func sendLocalTimeoutNotification() {
         let content = UNMutableNotificationContent()

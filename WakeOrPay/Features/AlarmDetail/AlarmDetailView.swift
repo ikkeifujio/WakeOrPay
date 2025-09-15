@@ -93,9 +93,9 @@ struct AlarmDetailView: View {
             .sheet(isPresented: $viewModel.showingRepeatPicker) {
                 RepeatPickerView(selectedDays: $viewModel.editedRepeatDays)
             }
-            .sheet(isPresented: $viewModel.showingQRCode) {
-                QRCodeDisplayView(qrCodeImage: viewModel.qrCodeImage)
-            }
+            // .sheet(isPresented: $viewModel.showingQRCode) {
+            //     QRCodeDisplayView(qrImage: viewModel.qrCodeImage)
+            // }
             .alert("アラームを削除", isPresented: $showingDeleteAlert) {
                 Button("削除", role: .destructive) {
                     viewModel.deleteAlarm()
@@ -343,45 +343,6 @@ struct AlarmDetailView: View {
     }
 }
 
-// MARK: - QR Code Display View
-
-struct QRCodeDisplayView: View {
-    @Environment(\.dismiss) private var dismiss
-    let qrCodeImage: UIImage?
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: AppConstants.Spacing.lg) {
-                if let qrImage = qrCodeImage {
-                    Image(uiImage: qrImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: 300, maxHeight: 300)
-                        .cornerRadius(AppConstants.UI.cornerRadius)
-                } else {
-                    Text("QRコードを生成できませんでした")
-                        .font(AppConstants.Fonts.body)
-                        .foregroundColor(AppConstants.Colors.error)
-                }
-                
-                Text("このQRコードをスキャンしてアラームを停止できます")
-                    .font(AppConstants.Fonts.body)
-                    .foregroundColor(AppConstants.Colors.secondaryText)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(AppConstants.Spacing.lg)
-            .navigationTitle("QRコード")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("閉じる") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
 
 #Preview {
     AlarmDetailView(alarm: Alarm(title: "テストアラーム", time: Date()))

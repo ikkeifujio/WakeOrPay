@@ -53,6 +53,7 @@
 		80AE5BD92E76A43B0062618B /* QRCodeUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeUtils.swift; sourceTree = "<group>"; };
 		80AE5BDF2E76A4480062618B /* AppColors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
 		80AE5BE92E76A8B20062618B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		80BE1BC72E782737001C1B36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +86,7 @@
 		801A956F2E76959900A9AC63 /* WakeOrPay */ = {
 			isa = PBXGroup;
 			children = (
+				80BE1BC72E782737001C1B36 /* Info.plist */,
 				80AE5BEA2E76A8B20062618B /* Preview Content */,
 				80AE5BE52E76A4480062618B /* Resources */,
 				80AE5BDB2E76A43B0062618B /* Shared */,
@@ -455,6 +457,9 @@
 				DEVELOPMENT_TEAM = 68L878M759;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WakeOrPay/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "値に \"WakeOrPayでアラーム停止用QRコードをスキャンするためにカメラを使用します\" を入力\n値に \"WakeOrPayでアラーム停止用QRコードをスキャンするためにカメラを使用します\" を入力\n値に \"WakeOrPayでアラーム停止用QRコードをスキャンするためにカメラを使用します\" を入力\nWakeOrPayでアラーム停止用QRコードをスキャンするためにカメラを使用します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -484,6 +489,9 @@
 				DEVELOPMENT_TEAM = 68L878M759;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WakeOrPay/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "値に \"WakeOrPayでアラーム停止用QRコードをスキャンするためにカメラを使用します\" を入力\n値に \"WakeOrPayでアラーム停止用QRコードをスキャンするためにカメラを使用します\" を入力\n値に \"WakeOrPayでアラーム停止用QRコードをスキャンするためにカメラを使用します\" を入力\nWakeOrPayでアラーム停止用QRコードをスキャンするためにカメラを使用します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

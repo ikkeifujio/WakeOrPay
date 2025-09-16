@@ -18,6 +18,10 @@ struct AlarmListView: View {
     @State private var qrCodeMessage = ""
     @State private var qrCodeData = ""
     @State private var showingHistory = false // Added for history view
+    @State private var isCountdownActive = false
+    @State private var remainingTime = 60
+    @State private var countdownTimer: Timer?
+    @State private var alarmFireDate: Date?
     
     var body: some View {
         NavigationView {
@@ -102,6 +106,7 @@ struct AlarmListView: View {
             Task {
                 await viewModel.requestNotificationPermission()
             }
+            loadCountdownState()
             
             // デバッグ情報を表示
             print("=== WakeOrPay デバッグ情報 ===")
@@ -109,6 +114,12 @@ struct AlarmListView: View {
             print("有効なアラーム数: \(viewModel.enabledAlarms.count)")
             print("次のアラーム: \(viewModel.nextAlarm?.title ?? "なし")")
             print("===============================")
+        }
+        .onDisappear {
+            // カウントダウン状態を保存
+            if isCountdownActive {
+                saveCountdownState()
+            }
         }
     }
     
@@ -681,6 +692,54 @@ struct QRCodePreviewView: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {
         DispatchQueue.main.async {
             self.previewLayer.frame = uiView.bounds
+        }
+    }
+}
+
+// MARK: - Countdown Timer Management
+
+extension AlarmListView {
+    private func startCountdownTimer() {
+        guard !isCountdownActive else { return }
+        
+        print("カウントダウンタイマーを開始")
+        isCountdownActive = true
+        
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            if self.remainingTime > 0 {
+                self.remainingTime -= 1
+            } else {
+                self.stopCountdownTimer()
+            }
+        }
+    }
+    
+    private func stopCountdownTimer() {
+        print("カウントダウンタイマーを停止")
+        countdownTimer?.invalidate()
+        countdownTimer = nil
+        isCountdownActive = false
+        remainingTime = 60
+    }
+    
+    private func saveCountdownState() {
+        UserDefaults.standard.set(isCountdownActive, forKey: "isCountdownActive")
+        UserDefaults.standard.set(remainingTime, forKey: "remainingTime")
+        if let fireDate = alarmFireDate {
+            UserDefaults.standard.set(fireDate.timeIntervalSince1970, forKey: "alarmFireDate")
+        }
+    }
+    
+    private func loadCountdownState() {
+        isCountdownActive = UserDefaults.standard.bool(forKey: "isCountdownActive")
+        remainingTime = UserDefaults.standard.integer(forKey: "remainingTime")
+        if remainingTime <= 0 {
+            remainingTime = 60
+        }
+        
+        let fireDateTimestamp = UserDefaults.standard.double(forKey: "alarmFireDate")
+        if fireDateTimestamp > 0 {
+            alarmFireDate = Date(timeIntervalSince1970: fireDateTimestamp)
         }
     }
 }

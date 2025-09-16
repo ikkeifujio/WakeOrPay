@@ -19,6 +19,7 @@ struct Alarm: Identifiable, Codable, Equatable {
     var snoozeInterval: Int // minutes
     var qrCodeRequired: Bool
     var qrCodeData: String?
+    var expectedQR: String // 期待するQRコード（"Universal"またはアラームID）
     var createdAt: Date
     var updatedAt: Date
     
@@ -32,8 +33,9 @@ struct Alarm: Identifiable, Codable, Equatable {
         volume: Float = 0.8,
         snoozeEnabled: Bool = true,
         snoozeInterval: Int = 5,
-        qrCodeRequired: Bool = false,
+        qrCodeRequired: Bool = true,
         qrCodeData: String? = nil,
+        expectedQR: String? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -48,6 +50,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         self.snoozeInterval = snoozeInterval
         self.qrCodeRequired = qrCodeRequired
         self.qrCodeData = qrCodeData
+        self.expectedQR = expectedQR ?? "Universal" // デフォルトはUniversal
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

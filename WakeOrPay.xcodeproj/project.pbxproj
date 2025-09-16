@@ -28,6 +28,10 @@
 		80AE5BDE2E76A43B0062618B /* QRCodeUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BD92E76A43B0062618B /* QRCodeUtils.swift */; };
 		80AE5BE62E76A4480062618B /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AE5BDF2E76A4480062618B /* AppColors.swift */; };
 		80AE5BEB2E76A8B20062618B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80AE5BE92E76A8B20062618B /* Preview Assets.xcassets */; };
+		80BE1BE22E78E10E001C1B36 /* WakeUpHistoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80BE1BE12E78E10E001C1B36 /* WakeUpHistoryService.swift */; };
+		80BE1BE42E78E11F001C1B36 /* WakeUpHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80BE1BE32E78E11F001C1B36 /* WakeUpHistory.swift */; };
+		80BE1BE72E78E135001C1B36 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80BE1BE52E78E135001C1B36 /* HistoryView.swift */; };
+		E848D40B78F24B18BC89F86D8869997E /* ServerWebhookService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F779DB3346674E278F32C547EFB5D12D /* ServerWebhookService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +58,10 @@
 		80AE5BDF2E76A4480062618B /* AppColors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
 		80AE5BE92E76A8B20062618B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		80BE1BC72E782737001C1B36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		80BE1BE12E78E10E001C1B36 /* WakeUpHistoryService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WakeUpHistoryService.swift; sourceTree = "<group>"; };
+		80BE1BE32E78E11F001C1B36 /* WakeUpHistory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WakeUpHistory.swift; path = Models/WakeUpHistory.swift; sourceTree = "<group>"; };
+		80BE1BE52E78E135001C1B36 /* HistoryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		F779DB3346674E278F32C547EFB5D12D /* ServerWebhookService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerWebhookService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +103,7 @@
 				80AE5BBA2E76A3FC0062618B /* Models */,
 				801A95702E76959900A9AC63 /* WakeOrPayApp.swift */,
 				801A95722E76959900A9AC63 /* ContentView.swift */,
+				80BE1BE32E78E11F001C1B36 /* WakeUpHistory.swift */,
 				801A95742E76959B00A9AC63 /* Assets.xcassets */,
 				801A95762E76959B00A9AC63 /* Preview Content */,
 			);
@@ -124,6 +133,8 @@
 				80AE5BBD2E76A40D0062618B /* AlarmService.swift */,
 				80AE5BBE2E76A40D0062618B /* NotificationService.swift */,
 				80AE5BBF2E76A40D0062618B /* SoundService.swift */,
+				F779DB3346674E278F32C547EFB5D12D /* ServerWebhookService.swift */,
+				80BE1BE12E78E10E001C1B36 /* WakeUpHistoryService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -159,6 +170,7 @@
 		80AE5BCE2E76A42E0062618B /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				80BE1BE62E78E135001C1B36 /* History */,
 				80AE5BC72E76A42E0062618B /* AlarmDetail */,
 				80AE5BCA2E76A42E0062618B /* AlarmList */,
 				80AE5BCD2E76A42E0062618B /* Settings */,
@@ -230,6 +242,14 @@
 				80AE5BE92E76A8B20062618B /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		80BE1BE62E78E135001C1B36 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				80BE1BE52E78E135001C1B36 /* HistoryView.swift */,
+			);
+			path = History;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -306,11 +326,15 @@
 				80AE5BBC2E76A3FC0062618B /* AlarmSettings.swift in Sources */,
 				80AE5BC12E76A40D0062618B /* AlarmService.swift in Sources */,
 				80AE5BC32E76A40D0062618B /* SoundService.swift in Sources */,
+				80BE1BE42E78E11F001C1B36 /* WakeUpHistory.swift in Sources */,
+				E848D40B78F24B18BC89F86D8869997E /* ServerWebhookService.swift in Sources */,
+				80BE1BE72E78E135001C1B36 /* HistoryView.swift in Sources */,
 				80AE5BD22E76A42E0062618B /* AlarmListView.swift in Sources */,
 				80AE5BDC2E76A43B0062618B /* AppConstants.swift in Sources */,
 				80AE5BD32E76A42E0062618B /* AlarmListViewModel.swift in Sources */,
 				80AE5BDE2E76A43B0062618B /* QRCodeUtils.swift in Sources */,
 				801A95732E76959900A9AC63 /* ContentView.swift in Sources */,
+				80BE1BE22E78E10E001C1B36 /* WakeUpHistoryService.swift in Sources */,
 				801A95712E76959900A9AC63 /* WakeOrPayApp.swift in Sources */,
 				80AE5BE62E76A4480062618B /* AppColors.swift in Sources */,
 				80AE5BD02E76A42E0062618B /* AlarmDetailView.swift in Sources */,

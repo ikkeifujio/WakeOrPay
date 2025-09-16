@@ -37,8 +37,6 @@ struct AddAlarmView: View {
                         // スヌーズ設定
                         snoozeSection
                         
-                        // QRコード設定
-                        qrCodeSection
                     }
                     .padding(AppConstants.Spacing.md)
                 }
@@ -211,22 +209,6 @@ struct AddAlarmView: View {
         }
     }
     
-    // MARK: - QR Code Section
-    
-    private var qrCodeSection: some View {
-        VStack(alignment: .leading, spacing: AppConstants.Spacing.sm) {
-            Toggle("QRコードで停止", isOn: $viewModel.editedQRCodeRequired)
-                .font(AppConstants.Fonts.headline)
-                .foregroundColor(AppConstants.Colors.text)
-            
-            if viewModel.editedQRCodeRequired {
-                Text("アラーム停止にはQRコードのスキャンが必要になります")
-                    .font(AppConstants.Fonts.caption)
-                    .foregroundColor(AppConstants.Colors.secondaryText)
-                    .padding(.top, AppConstants.Spacing.xs)
-            }
-        }
-    }
     
     
     private func saveAlarm() {
@@ -241,7 +223,7 @@ struct AddAlarmView: View {
             volume: viewModel.editedVolume,
             snoozeEnabled: viewModel.editedSnoozeEnabled,
             snoozeInterval: viewModel.editedSnoozeInterval,
-            qrCodeRequired: viewModel.editedQRCodeRequired
+            qrCodeRequired: true
         )
         
         onSave(newAlarm)

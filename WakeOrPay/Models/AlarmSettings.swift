@@ -11,33 +11,33 @@ struct AlarmSettings: Codable {
     var defaultSoundName: String
     var defaultVolume: Float
     var defaultSnoozeInterval: Int
-    var qrCodeEnabled: Bool
     var hapticFeedback: Bool
     var autoSnooze: Bool
     var maxSnoozeCount: Int
     var alarmDuration: Int // seconds
     var backgroundMode: Bool
+    var countdownEnabled: Bool
     
     init(
         defaultSoundName: String = "default",
         defaultVolume: Float = 0.8,
         defaultSnoozeInterval: Int = 5,
-        qrCodeEnabled: Bool = false,
         hapticFeedback: Bool = true,
         autoSnooze: Bool = false,
         maxSnoozeCount: Int = 3,
         alarmDuration: Int = 300, // 5 minutes
-        backgroundMode: Bool = true
+        backgroundMode: Bool = true,
+        countdownEnabled: Bool = true
     ) {
         self.defaultSoundName = defaultSoundName
         self.defaultVolume = defaultVolume
         self.defaultSnoozeInterval = defaultSnoozeInterval
-        self.qrCodeEnabled = qrCodeEnabled
         self.hapticFeedback = hapticFeedback
         self.autoSnooze = autoSnooze
         self.maxSnoozeCount = maxSnoozeCount
         self.alarmDuration = alarmDuration
         self.backgroundMode = backgroundMode
+        self.countdownEnabled = countdownEnabled
     }
     
     static let `default` = AlarmSettings()

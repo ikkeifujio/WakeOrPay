@@ -32,11 +32,10 @@ struct SettingsView: View {
                     // スヌーズ設定
                     snoozeSettingsSection
                     
-                    // QRコード設定
-                    qrCodeSettingsSection
                     
                     // 緊急通知設定
                     emergencyNotificationSection
+                    
                     
                     // その他の設定
                     otherSettingsSection
@@ -128,6 +127,9 @@ struct SettingsView: View {
             
             Toggle("バックグラウンド再生", isOn: $viewModel.settings.backgroundMode)
                 .font(AppConstants.Fonts.body)
+            
+            Toggle("カウントダウン機能", isOn: $viewModel.settings.countdownEnabled)
+                .font(AppConstants.Fonts.body)
         }
     }
     
@@ -178,20 +180,6 @@ struct SettingsView: View {
         }
     }
     
-    // MARK: - QR Code Settings Section
-    
-    private var qrCodeSettingsSection: some View {
-        Section("QRコード設定") {
-            Toggle("QRコード機能を有効にする", isOn: $viewModel.settings.qrCodeEnabled)
-                .font(AppConstants.Fonts.body)
-            
-            if viewModel.settings.qrCodeEnabled {
-                Text("アラーム停止にQRコードのスキャンが必要になります（3分以内）")
-                    .font(AppConstants.Fonts.caption)
-                    .foregroundColor(AppConstants.Colors.secondaryText)
-            }
-        }
-    }
     
     // MARK: - Emergency Notification Section
     
@@ -227,7 +215,7 @@ struct SettingsView: View {
             .foregroundColor(.blue)
             .disabled(!SMSService.shared.canSendSMS())
             
-            Text("QRコードスキャンが3分以内に完了しない場合、設定した連絡先にSMSを自動送信します")
+            Text("QRコードスキャンが1分以内に完了しない場合、設定した連絡先にSMSを自動送信します")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -419,12 +407,23 @@ struct SMSSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var phoneNumber: String = ""
     @State private var message: String = ""
+    @State private var useServerSMS: Bool = true
     @State private var showingAlert = false
     @State private var alertMessage = ""
     
     var body: some View {
         NavigationView {
             Form {
+                Section("SMS送信方法") {
+                    Toggle("サーバー自動送信を使用", isOn: $useServerSMS)
+                    
+                    Text(useServerSMS ? 
+                         "サーバーが自動的にSMSを送信します（推奨）" : 
+                         "手動でSMS送信画面を表示します")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
                 Section("緊急連絡先") {
                     TextField("電話番号", text: $phoneNumber)
                         .keyboardType(.phonePad)
@@ -453,7 +452,7 @@ struct SMSSettingsView: View {
                             .font(.body)
                             .fontWeight(.semibold)
                         
-                        Text(message.isEmpty ? "WakeOrPay緊急通知: アラームが3分以内に停止されませんでした。" : message)
+                        Text(message.isEmpty ? "WakeOrPay緊急通知: アラームが1分以内に停止されませんでした。" : message)
                             .font(.body)
                             .padding()
                             .background(Color(.systemGray6))
@@ -491,11 +490,13 @@ struct SMSSettingsView: View {
     private func loadSettings() {
         phoneNumber = SMSService.shared.getEmergencyContact() ?? ""
         message = SMSService.shared.getEmergencyMessage()
+        useServerSMS = UserDefaults.standard.object(forKey: "USE_SERVER_SMS") as? Bool ?? true // デフォルトでサーバーSMSを使用
     }
     
     private func saveSettings() {
         SMSService.shared.setEmergencyContact(phoneNumber)
         SMSService.shared.setEmergencyMessage(message)
+        UserDefaults.standard.set(useServerSMS, forKey: "USE_SERVER_SMS")
         
         alertMessage = "SMS設定を保存しました"
         showingAlert = true
@@ -532,7 +533,7 @@ class SMSService: NSObject, ObservableObject {
     }
     
     func getEmergencyMessage() -> String {
-        return UserDefaults.standard.string(forKey: "EMERGENCY_SMS_MESSAGE") ?? "WakeOrPay緊急通知: アラームが3分以内に停止されませんでした。"
+        return UserDefaults.standard.string(forKey: "EMERGENCY_SMS_MESSAGE") ?? "WakeOrPay緊急通知: アラームが1分以内に停止されませんでした。"
     }
     
     // MARK: - SMS Sending
@@ -542,6 +543,14 @@ class SMSService: NSObject, ObservableObject {
     }
     
     func sendEmergencySMS() {
+        // サーバー自動送信を使用するかどうかをチェック（デフォルトでサーバーSMSを使用）
+        let useServerSMS = UserDefaults.standard.object(forKey: "USE_SERVER_SMS") as? Bool ?? true
+        
+        if useServerSMS {
+            print("サーバー自動送信を使用するため、クライアント側SMS送信をスキップ")
+            return
+        }
+        
         guard canSendSMS() else {
             print("SMS送信ができません")
             return

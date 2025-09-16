@@ -86,10 +86,6 @@ class SettingsViewModel: ObservableObject {
         updateSettings()
     }
     
-    func updateQRCodeEnabled(_ enabled: Bool) {
-        settings.qrCodeEnabled = enabled
-        updateSettings()
-    }
     
     func updateHapticFeedback(_ enabled: Bool) {
         settings.hapticFeedback = enabled
@@ -113,6 +109,11 @@ class SettingsViewModel: ObservableObject {
     
     func updateBackgroundMode(_ enabled: Bool) {
         settings.backgroundMode = enabled
+        updateSettings()
+    }
+    
+    func updateCountdownEnabled(_ enabled: Bool) {
+        settings.countdownEnabled = enabled
         updateSettings()
     }
     

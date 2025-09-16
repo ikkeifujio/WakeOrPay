@@ -26,7 +26,6 @@ class AlarmDetailViewModel: ObservableObject {
     @Published var editedVolume: Float = 0.8
     @Published var editedSnoozeEnabled: Bool = true
     @Published var editedSnoozeInterval: Int = 5
-    @Published var editedQRCodeRequired: Bool = false
     
     private let alarmService = AlarmService.shared
     private let soundService = SoundService.shared
@@ -47,7 +46,6 @@ class AlarmDetailViewModel: ObservableObject {
         editedVolume = alarm.volume
         editedSnoozeEnabled = alarm.snoozeEnabled
         editedSnoozeInterval = alarm.snoozeInterval
-        editedQRCodeRequired = alarm.qrCodeRequired
     }
     
     // MARK: - Actions
@@ -76,7 +74,7 @@ class AlarmDetailViewModel: ObservableObject {
         updatedAlarm.volume = editedVolume
         updatedAlarm.snoozeEnabled = editedSnoozeEnabled
         updatedAlarm.snoozeInterval = editedSnoozeInterval
-        updatedAlarm.qrCodeRequired = editedQRCodeRequired
+        updatedAlarm.qrCodeRequired = true
         updatedAlarm.updatedAt = Date()
         
         alarmService.updateAlarm(updatedAlarm)

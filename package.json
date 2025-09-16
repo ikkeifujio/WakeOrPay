@@ -1,0 +1,22 @@
+{
+  "name": "wakeorpay-server",
+  "version": "1.0.0",
+  "description": "WakeOrPay server for automatic SMS notifications",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.19.3",
+    "twilio": "^4.19.0"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

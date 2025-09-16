@@ -53,13 +53,18 @@ class NotificationService: ObservableObject {
         let content = UNMutableNotificationContent()
         content.title = "WakeOrPay"
         content.body = alarm.title
-        content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: "\(alarm.soundName).wav"))
+        
+        // システムのデフォルトサウンドを使用（最も確実）
+        content.sound = UNNotificationSound.default
+        print("システムデフォルトサウンドを使用")
+        
         content.categoryIdentifier = "ALARM_CATEGORY"
         content.userInfo = [
             "alarmId": alarm.id.uuidString,
             "snoozeEnabled": alarm.snoozeEnabled,
             "snoozeInterval": alarm.snoozeInterval,
-            "qrCodeRequired": alarm.qrCodeRequired
+            "qrCodeRequired": alarm.qrCodeRequired,
+            "fireDate": nextAlarmTime.timeIntervalSince1970 // fireDateを保存
         ]
         
         // トリガー設定
@@ -126,8 +131,8 @@ class NotificationService: ObservableObject {
         case "STOP_ACTION":
             handleStopAction(alarmId: alarmId)
         case UNNotificationDefaultActionIdentifier:
-            // アプリを開く
-            break
+            // 通知タップ時にアラームを開始
+            startAlarmFromNotification(alarmId: alarmId, userInfo: userInfo)
         default:
             break
         }
@@ -159,5 +164,22 @@ class NotificationService: ObservableObject {
         removeAlarmNotification(alarmId)
         // アラームサービスに停止を通知
         AlarmService.shared.stopAlarm(alarmId)
+    }
+    
+    func startAlarmFromNotification(alarmId: UUID, userInfo: [AnyHashable: Any]) {
+        // アラームIDからアラーム情報を取得
+        let alarmService = AlarmService.shared
+        guard let alarm = alarmService.getAlarm(by: alarmId) else {
+            print("通知からアラーム情報を取得できませんでした: \(alarmId)")
+            return
+        }
+        
+        print("通知からアラームを開始: \(alarm.title)")
+        
+        // 通知からアプリを開いた場合は、状態復元フラグを設定してダイアログ表示を防ぐ
+        alarmService.setNotificationLaunchFlag(true)
+        
+        // 実際のアラーム開始（通知は送信しない）
+        alarmService.startAlarm(alarm)
     }
 }

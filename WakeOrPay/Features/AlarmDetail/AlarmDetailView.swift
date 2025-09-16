@@ -279,19 +279,6 @@ struct AlarmDetailView: View {
                 }
             }
             
-            // QRコード編集
-            VStack(alignment: .leading, spacing: AppConstants.Spacing.sm) {
-                Toggle("QRコードで停止", isOn: $viewModel.editedQRCodeRequired)
-                    .font(AppConstants.Fonts.headline)
-                    .foregroundColor(AppConstants.Colors.text)
-                
-                if viewModel.editedQRCodeRequired {
-                    Text("アラーム停止にはQRコードのスキャンが必要になります")
-                        .font(AppConstants.Fonts.caption)
-                        .foregroundColor(AppConstants.Colors.secondaryText)
-                        .padding(.top, AppConstants.Spacing.xs)
-                }
-            }
         }
         .padding(AppConstants.Spacing.md)
         .background(AppConstants.Colors.secondaryBackground)
